@@ -100,17 +100,26 @@
         .result-area { display: none; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .section-header {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
-            padding-bottom: 10px; border-bottom: 2px solid var(--bg-body);
-            color: var(--primary-dark); font-weight: 700; font-size: 1.2rem;
+        /* Summary Accordion */
+        details.summary-accordion {
+            border: 1px solid var(--border); border-radius: 12px;
+            overflow: hidden; background: #fff; transition: box-shadow 0.2s;
         }
-
-        .summary-box { line-height: 1.8; font-size: 0.95rem; }
+        details.summary-accordion summary {
+            padding: 15px 20px; cursor: pointer; font-weight: 700; color: var(--primary-dark);
+            background: #f0fdf4; display: flex; align-items: center; gap: 10px;
+            list-style: none; /* Hide default triangle */
+        }
+        details.summary-accordion summary::-webkit-details-marker { display: none; }
+        details.summary-accordion summary:hover { background: #dcfce7; }
+        details.summary-accordion[open] summary { border-bottom: 1px solid var(--border); }
+        
+        .summary-box { padding: 20px; line-height: 1.8; font-size: 0.95rem; }
         .summary-box h3 { color: var(--primary); margin-top: 20px; border-left: 4px solid var(--primary); padding-left: 10px; }
         .summary-box ul { padding-left: 20px; background: #f8fafc; padding: 15px 20px 15px 40px; border-radius: 8px; }
         .summary-box strong { color: var(--text-main); background: linear-gradient(transparent 60%, #fff176 60%); }
 
+        /* Quiz Card */
         .quiz-card {
             background: #fff; border: 1px solid var(--border); border-radius: 12px;
             padding: 20px; margin-bottom: 20px; position: relative;
@@ -213,7 +222,8 @@
                 <select id="questionType">
                     <option value="4択問題">4択問題 (Multiple Choice)</option>
                     <option value="○×問題">○×問題 (True/False)</option>
-                    <option value="計算問題">計算問題 (Math/Calculation)</option> <option value="記述式">記述・論述式 (Essay)</option>
+                    <option value="計算問題">計算問題 (Math/Calculation)</option>
+                    <option value="記述式">記述・論述式 (Essay)</option>
                     <option value="穴埋め">穴埋め問題 (Fill-in-the-blank)</option>
                 </select>
             </div>
@@ -241,17 +251,18 @@
     </div>
 
     <div id="outputArea" class="result-area">
-        <div id="summaryResult" class="card" style="display:none; border-top: 5px solid var(--accent);">
-            <div class="section-header">
+        <details id="summaryResult" class="summary-accordion" style="display:none;" open>
+            <summary>
                 <span class="material-icons-round" style="color:var(--accent);">lightbulb</span>
-                試験範囲の重要ポイント
-            </div>
+                <span>試験範囲の重要ポイント (クリックで開閉)</span>
+                <span class="material-icons-round" style="margin-left:auto;">expand_more</span>
+            </summary>
             <div class="summary-box" id="summaryContent"></div>
-        </div>
+        </details>
 
-        <div id="examResult" style="display:none;">
+        <div id="examResult" style="display:none; margin-top:20px;">
             <div class="card" style="border-top: 5px solid var(--primary); margin-bottom:20px;">
-                <div class="section-header">
+                <div class="section-header" style="margin-bottom:5px; border:none;">
                     <span class="material-icons-round" style="color:var(--primary);">assignment</span>
                     AI予想問題
                 </div>
@@ -308,7 +319,6 @@
         let textContext = "【学習資料データ】\n";
         let images = [];
 
-        // 自由記述テキストを追加
         if (userText.trim()) {
             textContext += "\n--- ユーザー入力テキスト ---\n" + userText + "\n";
         }
@@ -380,23 +390,23 @@
             if (type === 'summary') {
                 systemPrompt = `
 あなたは優秀な学習チューターです。提供された資料（テキストおよび画像）に基づいて、試験に出る可能性が高い重要なポイントを要約してください。
-出力はHTML形式で、<h3>見出し</h3>、<ul><li>箇条書き</li></ul>、重要な単語は<strong>太字</strong>を使って見やすく整形してください。Markdownは不要です。`;
+出力はHTML形式で、<h3>見出し</h3>、<ul><li>箇条書き</li></ul>、重要な単語は<strong>太字</strong>を使って見やすく整形してください。Markdown記法( \`\`\`html 等)は含めず、純粋なHTMLタグのみを出力してください。`;
             } else {
                 systemPrompt = `
-あなたは試験問題作成のプロです。提供された資料（テキストおよび画像）に基づいて、予想問題を作成してください。
+あなたは試験問題作成のプロです。提供された資料に基づいて、予想問題を作成してください。
 形式: ${qType}、難易度: ${diff}、問題数: 3〜5問。
 
 ${qType === '計算問題' ? 
 '【重要】計算問題なので、正解だけでなく、正解に至るまでの「計算過程（途中式）」や「使用する公式」を解説フィールドに詳しく記述してください。' : ''}
 
-【出力フォーマット】
-以下のJSON形式のみを出力してください（Markdown記法は不要）。
+【重要：出力形式】
+**必ず**以下のJSON配列形式のみを出力してください。Markdown記法(\`\`\`json 等)や挨拶文は一切含めないでください。
 [
   {
     "question": "問題文",
-    "options": ["選択肢1", "選択肢2", "選択肢3", "選択肢4"], // 記述式・計算問題の場合は空配列[]
+    "options": ["選択肢1", "選択肢2", "選択肢3", "選択肢4"], 
     "answer": "正解",
-    "explanation": "詳しい解説。計算問題の場合は計算過程を記述。"
+    "explanation": "解説"
   }
 ]`;
             }
@@ -417,22 +427,42 @@ ${qType === '計算問題' ?
 
             if (!response.ok) throw new Error("APIエラーが発生しました");
             const data = await response.json();
-            const resultText = data.candidates[0].content.parts[0].text;
+            let resultText = data.candidates[0].content.parts[0].text;
 
             document.getElementById('outputArea').style.display = 'block';
             
             if (type === 'summary') {
                 document.getElementById('summaryResult').style.display = 'block';
                 document.getElementById('examResult').style.display = 'none';
-                document.getElementById('summaryContent').innerHTML = resultText.replace(/```html|```/g, '');
+                
+                // マークダウンの除去（頑丈化）
+                resultText = resultText.replace(/^```html/, '').replace(/^```/, '').replace(/```$/, '');
+                
+                document.getElementById('summaryContent').innerHTML = resultText;
+                document.getElementById('summaryResult').open = true; // 新規作成時は開く
                 document.getElementById('summaryResult').scrollIntoView({ behavior: 'smooth' });
             } else {
                 document.getElementById('summaryResult').style.display = 'none';
                 document.getElementById('examResult').style.display = 'block';
-                const jsonText = resultText.replace(/```json|```/g, '').trim();
-                const questions = JSON.parse(jsonText);
-                renderQuiz(questions, qType);
-                document.getElementById('examResult').scrollIntoView({ behavior: 'smooth' });
+                
+                // JSON抽出ロジック（頑丈化）
+                // 1. ```json ... ``` を除去
+                // 2. [ ... ] の部分だけを正規表現で抜き出す
+                const jsonMatch = resultText.match(/\[[\s\S]*\]/);
+                if (jsonMatch) {
+                    resultText = jsonMatch[0];
+                } else {
+                    // JSONが見つからない場合のフォールバック（パースしてみる）
+                    console.warn("JSON pattern not found, trying raw parse");
+                }
+
+                try {
+                    const questions = JSON.parse(resultText);
+                    renderQuiz(questions, qType);
+                    document.getElementById('examResult').scrollIntoView({ behavior: 'smooth' });
+                } catch (parseError) {
+                    throw new Error("AIの回答を解析できませんでした。\n" + resultText.substring(0, 100) + "...");
+                }
             }
 
         } catch (e) {
@@ -458,7 +488,6 @@ ${qType === '計算問題' ?
             if (q.options && q.options.length > 0) {
                 // 選択式
                 q.options.forEach(opt => {
-                    // escape quotes for safety
                     const safeOpt = opt.replace(/'/g, "\\'");
                     const safeAns = q.answer.replace(/'/g, "\\'");
                     optionsHtml += `<button class="option-btn" onclick="checkAnswer(this, '${safeOpt}', '${safeAns}')">${opt}</button>`;
