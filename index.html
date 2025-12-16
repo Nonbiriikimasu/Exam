@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C-Lang Practice AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #0d47a1;
+            --success: #34a853;
+            --warning: #fbbc04;
+            --danger: #ea4335;
+            --bg-body: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-main: #202124;
+            --text-sub: #5f6368;
+            --border: #dadce0;
+            --code-bg: #1e1e1e;
+            --code-text: #d4d4d4;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        header { text-align: center; margin-bottom: 40px; }
+        h1 {
+            font-size: 1.8rem; margin: 0;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .subtitle { color: var(--text-sub); font-size: 0.9rem; margin-top: 5px; }
+
+        /* Card */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .form-row {
+            display: flex; gap: 20px; margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .form-group { flex: 1; min-width: 200px; }
+        
+        label {
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 700; font-size: 0.85rem;
+            margin-bottom: 8px; color: var(--text-sub);
+        }
+        
+        .label-links a {
+            color: var(--primary); text-decoration: none; font-weight: normal; margin-left: 10px;
+            font-size: 0.8rem; display: inline-flex; align-items: center; gap: 2px;
+        }
+        .label-links a:hover { text-decoration: underline; }
+
+        input, select {
+            width: 100%; padding: 12px;
+            border: 1px solid var(--border); border-radius: 8px;
+            font-size: 1rem; background: #fff;
+            appearance: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        /* Accordion */
+        .accordion-wrapper {
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .accordion-header {
+            padding: 15px 20px; background: #f8f9fa; color: var(--text-main); font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            transition: background 0.2s; user-select: none;
+        }
+        .accordion-header:hover { background: #f1f3f4; }
+        .accordion-content {
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #fff;
+        }
+        .accordion-body { padding: 25px; color: var(--text-main); font-size: 0.95rem; border-top: 1px solid #f0f0f0; }
+
+        /* Specific Header Colors */
+        .header-exp { background: #e8f0fe; color: var(--primary); }
+        .header-exp:hover { background: #dce8fd; }
+        
+        .header-feedback { background: #fff8e1; color: #b08800; }
+        .header-feedback:hover { background: #ffecb3; }
+
+        .header-model { background: #e6f4ea; color: var(--success); }
+        .header-model:hover { background: #ceead6; }
+
+        .topic-title { font-size: 1.1rem; font-weight: bold; border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin-bottom: 15px; display: inline-block; }
+        .topic-subtitle { font-weight: bold; margin-top: 15px; margin-bottom: 5px; color: #444; display: flex; align-items: center; gap: 5px; }
+        .exp-code { background: #f4f4f4; padding: 10px; border-radius: 6px; font-family: 'Roboto Mono', monospace; font-size: 0.9rem; color: #333; border: 1px solid #ddd; margin: 5px 0; overflow-x: auto; }
+        .exp-list { padding-left: 20px; margin: 5px 0 15px 0; }
+        .exp-list li { margin-bottom: 5px; }
+
+        /* Question Area - Improved Design */
+        #question-area {
+            background: #ffffff;
+            padding: 25px; border-radius: 16px;
+            border: 2px solid #e8f0fe;
+            margin-bottom: 25px; display: none;
+            box-shadow: 0 4px 15px rgba(26, 115, 232, 0.05);
+        }
+        .q-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 15px;
+            border-bottom: 2px solid #f1f3f4; padding-bottom: 10px;
+        }
+        .q-icon {
+            background: var(--primary); color: white; border-radius: 50%; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+        .q-label { font-weight: 700; color: var(--primary); font-size: 0.9rem; letter-spacing: 0.05em; }
+        .q-title { font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0; }
+        .q-desc { font-size: 1rem; color: var(--text-main); white-space: pre-wrap; line-height: 1.8; }
+
+        /* Code Editor */
+        .editor-wrapper { position: relative; margin-bottom: 20px; }
+        textarea#code-editor {
+            width: 100%; height: 400px;
+            background-color: var(--code-bg); color: var(--code-text);
+            font-family: 'Roboto Mono', monospace; font-size: 14px;
+            padding: 45px 20px 20px 20px; border-radius: 8px; border: none;
+            resize: vertical; tab-size: 4; outline: none; line-height: 1.5;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .editor-header {
+            position: absolute; top: 0; left: 0; right: 0;
+            background: #2d2d2d; color: #aaa;
+            padding: 8px 15px; border-radius: 8px 8px 0 0;
+            font-size: 0.8rem; font-weight: bold;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        .run-link { color: #81c784; text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color 0.2s;}
+        .run-link:hover { text-decoration: underline; color: #a5d6a7; }
+
+        /* Buttons */
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 50px;
+            font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background-color: var(--text-main); color: #fff; }
+        .btn-accent { background-color: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3); }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { background-color: #bdc1c6; cursor: not-allowed; box-shadow: none; }
+
+        /* Result Area */
+        #result-area { display: none; margin-top: 30px; animation: fadeIn 0.5s ease; }
+        
+        .score-card {
+            text-align: center; margin-bottom: 20px; padding: 20px;
+            border-radius: 12px; border: 2px solid transparent;
+            background: #fff;
+        }
+        .score-card.high { border-color: var(--success); background-color: #e6f4ea; color: var(--success); }
+        .score-card.mid { border-color: var(--warning); background-color: #fef7e0; color: #b08800; }
+        .score-card.low { border-color: var(--danger); background-color: #fce8e6; color: var(--danger); }
+
+        .score-title { font-weight: bold; font-size: 1rem; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .score-value { font-size: 3.5rem; font-weight: 800; line-height: 1; margin: 10px 0; }
+        .score-max { font-size: 1.5rem; opacity: 0.6; font-weight: 600; }
+
+        /* Feedback Content Styles */
+        .fb-content { line-height: 1.8; font-size: 0.95rem; }
+        .fb-content ul { padding-left: 20px; margin: 10px 0; }
+        .fb-content li { margin-bottom: 5px; }
+        .fb-content strong { background: linear-gradient(transparent 60%, #fff176 60%); padding: 0 2px; }
+
+        /* Model Answer Code Block */
+        pre {
+            background: #282c34; color: #abb2bf;
+            padding: 20px; border-radius: 8px;
+            overflow-x: auto; font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem; margin: 0; line-height: 1.5;
+            border: 1px solid #3e4451;
+        }
+
+        .loader {
+            width: 20px; height: 20px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%;
+            animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden { display: none; }
+        .error-msg { color: #d93025; background: #fce8e6; padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-top: 10px; display: none; }
+        
+        .retry-note {
+            text-align: center; font-size: 0.85rem; color: var(--text-sub); margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1><span class="material-icons-round" style="color:var(--primary);">code</span> C-Lang Practice AI</h1>
+        <div class="subtitle">情報処理II 講義対応・演習システム</div>
+    </header>
+
+    <div class="card">
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>
+                API Key (Google Gemini)
+                <div class="label-links">
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank">
+                        <span class="material-icons-round" style="font-size:16px;">open_in_new</span> Google AI Studio
+                    </a>
+                    <a href="help.html" target="_blank">
+                        <span class="material-icons-round" style="font-size:16px;">help_outline</span> 取得方法・解説
+                    </a>
+                </div>
+            </label>
+            <input type="password" id="apiKey" placeholder="Alza... (APIキーをここに貼り付け)">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>学習単元</label>
+                <select id="genre" onchange="updateExplanation()">
+                    <option value="topic1">1. プログラムの基礎 (変数, 計算, 入出力)</option>
+                    <option value="topic2">2. 条件分岐 (if, switch)</option>
+                    <option value="topic3">3. 繰り返し (while, for, do-while)</option>
+                    <option value="topic4">4. 関数 (定義, 引数, 戻り値)</option>
+                    <option value="topic5">5. 再帰関数 (階乗, フィボナッチ)</option>
+                    <option value="topic6">6. 配列 (1次元・2次元, ソート)</option>
+                    <option value="topic7">7. 文字と文字列 (char配列, ASCII)</option>
+                    <option value="topic8">8. ポインタ (アドレス, 参照渡し)</option>
+                    <option value="topic9">9. メモリの動的確保 (malloc, free)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>難易度</label>
+                <select id="difficulty">
+                    <option value="基礎">🔰 基礎 (文法確認)</option>
+                    <option value="標準">💻 標準 (授業の演習レベル)</option>
+                    <option value="応用">🔥 応用 (アルゴリズム応用)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="accordion-wrapper">
+            <div class="accordion-header header-exp" onclick="toggleAccordion('exp-content', 'exp-icon')">
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <span class="material-icons-round">lightbulb</span>
+                    <span id="exp-header-text">1. プログラムの基礎 のポイント</span>
+                </span>
+                <span class="material-icons-round" id="exp-icon">expand_more</span>
+            </div>
+            <div class="accordion-content" id="exp-content">
+                <div class="accordion-body" id="exp-body"></div>
+            </div>
+        </div>
+
+        <button id="btn-start" class="btn btn-primary" onclick="generateProblem()">
+            <span>問題を作成する</span>
+            <div class="loader" id="loader-start"></div>
+        </button>
+        <div id="errorMsg" class="error-msg"></div>
+    </div>
+
+    <div id="exercise-section" class="hidden">
+        <div id="question-area">
+            <div class="q-header">
+                <div class="q-icon"><span class="material-icons-round">help</span></div>
+                <div style="flex:1;">
+                    <span class="q-label">QUESTION</span>
+                    <h2 id="q-title" class="q-title"></h2>
+                </div>
+            </div>
+            <div id="q-desc" class="q-desc"></div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <div class="editor-wrapper">
+                <div class="editor-header">
+                    <span style="display:flex; align-items:center; gap:5px;"><span class="material-icons-round" style="font-size:16px;">edit</span> main.c</span>
+                    <a href="https://paiza.io/ja/languages/c" target="_blank" class="run-link">
+                        <span class="material-icons-round" style="font-size:14px;">open_in_new</span>
+                        オンラインコンパイラ (Paiza.IO)
+                    </a>
+                </div>
+                <textarea id="code-editor" spellcheck="false">
+#include <stdio.h>
+
+int main(void) {
+    // ここにコードを書いてください
+    
+    return 0;
+}</textarea>
+            </div>
+
+            <button id="btn-submit" class="btn btn-accent" onclick="submitCode()">
+                <span>提出して採点</span>
+                <div class="loader" id="loader-submit"></div>
+            </button>
+            <div class="retry-note">※ コードを修正して何度でも再提出できます</div>
+        </div>
+    </div>
+
+    <div id="result-area" class="card">
+        <div class="score-card" id="score-card">
+            <div class="score-title" id="score-title">
+                <span class="material-icons-round">analytics</span> 採点結果
+            </div>
+            <div class="score-value">
+                <span id="res-score">--</span><span class="score-max">/ 100</span>
+            </div>
+        </div>
+
+        <div class="accordion-wrapper">
+            <div class="accordion-header header-feedback" onclick="toggleAccordion('fb-content', 'fb-icon')">
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <span class="material-icons-round" style="color:#f9a825;">lightbulb</span>
+                    <span>AIからのフィードバック</span>
+                </span>
+                <span class="material-icons-round" id="fb-icon">expand_more</span>
+            </div>
+            <div class="accordion-content" id="fb-content">
+                <div class="accordion-body fb-content" id="res-feedback"></div>
+            </div>
+        </div>
+
+        <div class="accordion-wrapper">
+            <div class="accordion-header header-model" onclick="toggleAccordion('model-content', 'model-icon')">
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <span class="material-icons-round" style="color:#34a853;">code</span>
+                    <span>模範解答例を表示</span>
+                </span>
+                <span class="material-icons-round" id="model-icon">expand_more</span>
+            </div>
+            <div class="accordion-content" id="model-content">
+                <div class="accordion-body" style="padding:0;">
+                    <div id="res-model-code"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 解説データ ---
+    const topicExplanations = {
+        "topic1": `
+            <div class="topic-title">プログラムの基本構造と変数</div>
+            <div class="topic-subtitle"><span class="material-icons-round" style="font-size:18px;">menu_book</span> 基本構文</div>
+            <p>C言語のプログラムは <code>main</code> 関数から始まります。変数は使用する前に宣言が必要です。</p>
+            <div class="exp-code">#include &lt;stdio.h&gt;\n\nint main(void) {\n    int a;       // 整数型変数の宣言\n    a = 10;      // 代入\n    printf("a = %d\\n", a); // 表示\n    return 0;\n}</div>
+            <div class="topic-subtitle"><span class="material-icons-round" style="font-size:18px;">calculate</span> 計算と型</div>
+            <ul class="exp-list">
+                <li><strong>int</strong>: 整数。割り算 <code>5/2</code> は <code>2</code> (切り捨て) になるので注意。</li>
+                <li><strong>float</strong>: 実数。入出力には <code>%f</code> を使う。</li>
+                <li><strong>scanf</strong>: 入力には <code>&</code> が必要。例: <code>scanf("%d", &a);</code></li>
+            </ul>`,
+        "topic2": `<div class="topic-title">条件分岐</div><p>if文やswitch文を使って処理を分けます。switch文では <code>break</code> を忘れないように。</p>`,
+        "topic3": `<div class="topic-title">繰り返し処理</div><p>回数が決まっているなら <code>for</code>、条件で繰り返すなら <code>while</code> を使います。</p>`,
+        "topic4": `<div class="topic-title">関数</div><p>処理を部品化します。プロトタイプ宣言を忘れずに。</p>`,
+        "topic5": `<div class="topic-title">再帰関数</div><p>関数内で自分自身を呼び出します。必ず終了条件（ベースケース）が必要です。</p>`,
+        "topic6": `<div class="topic-title">配列</div><p>同じ型のデータをまとめて扱います。添字は0から始まります。</p>`,
+        "topic7": `<div class="topic-title">文字と文字列</div><p>文字列は <code>char</code> 型の配列です。末尾には <code>\\0</code> が入ります。</p>`,
+        "topic8": `<div class="topic-title">ポインタ</div><p>変数のアドレスを扱います。<code>&a</code> でアドレス取得、<code>*p</code> で中身を参照します。</p>`,
+        "topic9": `
+            <div class="topic-title">メモリの動的確保 (Dynamic Allocation)</div>
+            <div class="topic-subtitle"><span class="material-icons-round" style="font-size:18px;">memory</span> mallocとfree</div>
+            <p>プログラム実行中に必要な分だけメモリを確保します。使い終わったら必ず開放します。</p>
+            <div class="exp-code">
+#include &lt;stdlib.h&gt; // 必須
+
+int main(void) {
+    int *p;
+    // int型1個分を確保
+    p = (int *)malloc(sizeof(int));
+    
+    *p = 10;
+    printf("%d\\n", *p);
+    
+    free(p); // 必須: 開放
+    return 0;
+}
+            </div>
+            <div class="topic-subtitle"><span class="material-icons-round" style="font-size:18px;">view_column</span> 配列としての利用</div>
+            <p>要素数 <code>n</code> 個の配列を確保する場合：</p>
+            <div class="exp-code">
+int n = 5;
+int *arr = (int *)malloc(sizeof(int) * n);
+// arr[0] 〜 arr[4] として使える
+free(arr);
+            </div>
+        `
+    };
+
+    const courseContext = {
+        "topic1": `【単元1: 変数と計算】 - 必須: int, float, printf, scanf, 四則演算 - 演習: 総和, 積, 剰余`,
+        "topic2": `【単元2: 条件分岐】 - 必須: if, switch - 演習: 正負判定, 解の個数`,
+        "topic3": `【単元3: 繰り返し】 - 必須: for, while - 演習: 1からNの和, 九九, 入力チェック`,
+        "topic4": `【単元4: 関数】 - 必須: 関数定義, 引数 - 演習: 階乗, 累乗, 組み合わせ`,
+        "topic5": `【単元5: 再帰関数】 - 必須: 再帰呼び出し - 演習: 階乗, フィボナッチ, ハノイ`,
+        "topic6": `【単元6: 配列】 - 必須: 配列, 2次元配列 - 演習: 最大最小, ソート, 行列`,
+        "topic7": `【単元7: 文字と文字列】 - 必須: char配列, 文字列操作 - 演習: 回文, 連結, 検索`,
+        "topic8": `【単元8: ポインタ】 - 必須: アドレス, 参照渡し - 演習: swap関数, 配列操作`,
+        "topic9": `【単元9: メモリの動的確保】 - 必須: malloc, free, sizeof, #include <stdlib.h> - 演習: 配列の動的確保, データ入力, 合計・平均 - 注意: free忘れ, キャスト(int*)`
+    };
+
+    // --- UI Logic ---
+    function updateExplanation() {
+        const genre = document.getElementById('genre').value;
+        const select = document.getElementById('genre');
+        const text = select.options[select.selectedIndex].text;
+        document.getElementById('exp-header-text').innerText = text + " のポイント";
+        document.getElementById('exp-body').innerHTML = topicExplanations[genre];
+        openAccordion('exp-content', 'exp-icon');
+    }
+
+    // 汎用アコーディオン開閉
+    function toggleAccordion(contentId, iconId) {
+        const content = document.getElementById(contentId);
+        const icon = document.getElementById(iconId);
+        if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+            icon.style.transform = "rotate(0deg)";
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+            icon.style.transform = "rotate(180deg)";
+        }
+    }
+
+    function openAccordion(contentId, iconId) {
+        const content = document.getElementById(contentId);
+        const icon = document.getElementById(iconId);
+        content.style.maxHeight = content.scrollHeight + "px";
+        icon.style.transform = "rotate(180deg)";
+    }
+
+    function closeAccordion(contentId, iconId) {
+        const content = document.getElementById(contentId);
+        const icon = document.getElementById(iconId);
+        content.style.maxHeight = null;
+        icon.style.transform = "rotate(0deg)";
+    }
+
+    window.onload = function() {
+        updateExplanation();
+    };
+
+    // --- Gemini API Logic ---
+    async function findWorkingModel(apiKey) {
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+            const models = data.models || [];
+            const validModel = models.find(m => m.name.includes("flash")) 
+                            || models.find(m => m.name.includes("pro"))
+                            || models.find(m => m.supportedGenerationMethods.includes("generateContent"));
+            if (!validModel) throw new Error("利用可能なモデルが見つかりません");
+            return validModel.name.replace('models/', '');
+        } catch (e) {
+            return "gemini-1.5-flash"; 
+        }
+    }
+
+    async function generateProblem() {
+        const apiKey = document.getElementById('apiKey').value.trim();
+        const genreKey = document.getElementById('genre').value;
+        const diff = document.getElementById('difficulty').value;
+        const errBox = document.getElementById('errorMsg');
+
+        if (!apiKey) {
+            errBox.style.display = 'block';
+            errBox.innerText = "APIキーを入力してください";
+            return;
+        }
+        errBox.style.display = 'none';
+
+        uiState('loading-start');
+
+        try {
+            const model = await findWorkingModel(apiKey);
+            const contextInfo = courseContext[genreKey];
+
+            // プロンプト改善：明確な入力・出力例を求める
+            const prompt = `
+あなたは大学の「情報処理II (C言語)」の演習システムです。
+以下の講義・演習範囲に基づいて、学生向けの演習問題を作成してください。
+
+【学習範囲情報】
+${contextInfo}
+
+【難易度】
+${diff}
+
+【出力ルール】
+以下のJSON形式のみを出力してください（Markdown記法は不要）。
+"description"には、問題の目的だけでなく、必ず「入力例」と「出力例」を含めて具体的に記述してください。
+{
+  "title": "問題のタイトル",
+  "description": "問題文。\n\n【入力例】\n5\n10 20 30 40 50\n\n【出力例】\n平均: 30.0",
+  "template": "初期コード（#include <stdio.h> int main(void){ ... } 程度）"
+}`;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            
+            if(!res.ok) throw new Error("API Request Failed");
+
+            const data = await res.json();
+            const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+            const json = JSON.parse(text);
+
+            document.getElementById('q-title').innerText = json.title;
+            document.getElementById('q-desc').innerText = json.description;
+            if(json.template) document.getElementById('code-editor').value = json.template;
+            
+            // 結果エリアを非表示、エディタを表示
+            document.getElementById('exercise-section').style.display = 'block';
+            document.getElementById('question-area').style.display = 'block';
+            document.getElementById('result-area').style.display = 'none';
+            document.getElementById('exercise-section').scrollIntoView({ behavior: 'smooth' });
+
+        } catch (e) {
+            errBox.style.display = 'block';
+            errBox.innerText = "エラー: " + e.message + "\nAPIキーを確認してください。";
+        } finally {
+            uiState('idle-start');
+        }
+    }
+
+    async function submitCode() {
+        const apiKey = document.getElementById('apiKey').value.trim();
+        const genreKey = document.getElementById('genre').value;
+        const problemTitle = document.getElementById('q-title').innerText;
+        const problemDesc = document.getElementById('q-desc').innerText;
+        const userCode = document.getElementById('code-editor').value;
+        const errBox = document.getElementById('errorMsg');
+
+        if (!userCode) { alert("コードを入力してください"); return; }
+
+        uiState('loading-submit');
+
+        try {
+            const model = await findWorkingModel(apiKey);
+            const contextInfo = courseContext[genreKey];
+
+            // プロンプト改善：模範解答のコード品質を担保
+            const prompt = `
+あなたはC言語の採点官です。
+以下の問題に対する学生のコードを評価・添削してください。
+
+【講義の前提知識】
+${contextInfo}
+
+【問題】
+${problemTitle}
+${problemDesc}
+
+【提出コード】
+${userCode}
+
+【出力フォーマット】
+以下のJSON形式のみを出力してください（Markdown不要）。
+feedbackフィールドには、見出し(<h3>等)、箇条書き(<ul><li>等)、太字(<b>)などのHTMLタグを使って、視覚的にわかりやすく記述してください。
+corrected_codeには、コメント付きの模範解答を記述してください。
+{
+  "score": 点数(0-100の整数),
+  "feedback": "<h3>判定</h3>... <h3>良かった点</h3><ul><li>...</li></ul> <h3>改善点・解説</h3><ul><li>...</li></ul>",
+  "corrected_code": "/* 模範解答 */\n#include <stdio.h>\n..."
+}`;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+
+            if(!res.ok) throw new Error("API Request Failed");
+
+            const data = await res.json();
+            const text = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+            const json = JSON.parse(text);
+
+            // 結果の反映
+            const score = json.score;
+            document.getElementById('res-score').innerText = score;
+            document.getElementById('res-feedback').innerHTML = json.feedback;
+            
+            // スコアスタイル
+            const scoreCard = document.getElementById('score-card');
+            const scoreTitle = document.getElementById('score-title');
+            scoreCard.className = 'score-card'; // Reset
+            if (score >= 80) {
+                scoreCard.classList.add('high');
+                scoreTitle.innerHTML = '<span class="material-icons-round">sentiment_satisfied_alt</span> 素晴らしい！';
+            } else if (score >= 50) {
+                scoreCard.classList.add('mid');
+                scoreTitle.innerHTML = '<span class="material-icons-round">sentiment_neutral</span> おしい！あと少し';
+            } else {
+                scoreCard.classList.add('low');
+                scoreTitle.innerHTML = '<span class="material-icons-round">sentiment_dissatisfied</span> 復習しましょう';
+            }
+
+            // 模範解答セット（エスケープ）
+            const escapedCode = json.corrected_code
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+            document.getElementById('res-model-code').innerHTML = `<pre>${escapedCode}</pre>`;
+
+            // エリア表示とスクロール
+            document.getElementById('result-area').style.display = 'block';
+            
+            // アコーディオン制御：フィードバックは開く、模範解答は閉じる
+            openAccordion('fb-content', 'fb-icon');
+            closeAccordion('model-content', 'model-icon');
+
+            document.getElementById('result-area').scrollIntoView({ behavior: 'smooth' });
+
+        } catch (e) {
+            errBox.style.display = 'block';
+            errBox.innerText = "採点エラー: " + e.message;
+        } finally {
+            uiState('idle-submit');
+        }
+    }
+
+    document.getElementById('code-editor').addEventListener('keydown', function(e) {
+        if (e.key == 'Tab') {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
+        }
+    });
+
+    function uiState(state) {
+        const startBtn = document.getElementById('btn-start');
+        const submitBtn = document.getElementById('btn-submit');
+        const lStart = document.getElementById('loader-start');
+        const lSubmit = document.getElementById('loader-submit');
+
+        if (state === 'loading-start') {
+            startBtn.disabled = true;
+            lStart.style.display = 'block';
+        } else if (state === 'idle-start') {
+            startBtn.disabled = false;
+            lStart.style.display = 'none';
+        } else if (state === 'loading-submit') {
+            submitBtn.disabled = true;
+            lSubmit.style.display = 'block';
+        } else if (state === 'idle-submit') {
+            submitBtn.disabled = false;
+            lSubmit.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
