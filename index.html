@@ -52,8 +52,6 @@
         }
 
         .form-group { margin-bottom: 20px; }
-        
-        /* Updated Label Style with Links */
         label {
             display: flex; align-items: center; justify-content: space-between;
             font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; color: var(--text-sub);
@@ -140,7 +138,7 @@
         .explanation-box {
             margin-top: 15px; padding: 15px; background: #f0f9ff;
             border: 1px solid #bae6fd; border-radius: 10px; color: #0369a1;
-            display: none; font-size: 0.9rem; line-height: 1.6;
+            display: none; font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;
         }
         .exp-label { font-weight: bold; display: block; margin-bottom: 5px; }
 
@@ -215,7 +213,7 @@
                 <select id="questionType">
                     <option value="4択問題">4択問題 (Multiple Choice)</option>
                     <option value="○×問題">○×問題 (True/False)</option>
-                    <option value="記述式">記述・論述式 (Essay)</option>
+                    <option value="計算問題">計算問題 (Math/Calculation)</option> <option value="記述式">記述・論述式 (Essay)</option>
                     <option value="穴埋め">穴埋め問題 (Fill-in-the-blank)</option>
                 </select>
             </div>
@@ -388,14 +386,17 @@
 あなたは試験問題作成のプロです。提供された資料（テキストおよび画像）に基づいて、予想問題を作成してください。
 形式: ${qType}、難易度: ${diff}、問題数: 3〜5問。
 
+${qType === '計算問題' ? 
+'【重要】計算問題なので、正解だけでなく、正解に至るまでの「計算過程（途中式）」や「使用する公式」を解説フィールドに詳しく記述してください。' : ''}
+
 【出力フォーマット】
 以下のJSON形式のみを出力してください（Markdown記法は不要）。
 [
   {
     "question": "問題文",
-    "options": ["選択肢1", "選択肢2", "選択肢3", "選択肢4"], // 記述式の場合は空配列[]
-    "answer": "正解の文字列",
-    "explanation": "詳しい解説。資料のどの部分に基づくかも言及。"
+    "options": ["選択肢1", "選択肢2", "選択肢3", "選択肢4"], // 記述式・計算問題の場合は空配列[]
+    "answer": "正解",
+    "explanation": "詳しい解説。計算問題の場合は計算過程を記述。"
   }
 ]`;
             }
@@ -463,10 +464,10 @@
                     optionsHtml += `<button class="option-btn" onclick="checkAnswer(this, '${safeOpt}', '${safeAns}')">${opt}</button>`;
                 });
             } else {
-                // 記述式
+                // 記述式・計算問題
                 optionsHtml = `
                     <textarea style="width:100%; border:2px solid #e5e7eb; padding:15px; border-radius:10px; font-family:inherit;" rows="3" placeholder="ここに回答を入力"></textarea>
-                    <button class="btn btn-exam" style="margin-top:10px; font-size:0.9rem; padding:10px;" onclick="showAnswer(this)">模範解答を見る</button>
+                    <button class="btn btn-exam" style="margin-top:10px; font-size:0.9rem; padding:10px;" onclick="showAnswer(this)">解答と解説を見る</button>
                 `;
             }
 
