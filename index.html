@@ -11,10 +11,10 @@
     
     <style>
         :root {
-            --primary: #6366f1; /* 知的なインディゴ */
+            --primary: #6366f1;
             --primary-dark: #4f46e5;
-            --accent: #10b981;   /* 正解のグリーン */
-            --danger: #ef4444;   /* 不正解のレッド */
+            --accent: #10b981;
+            --danger: #ef4444;
             --bg-body: #f3f4f6;
             --bg-card: #ffffff;
             --text-main: #1f2937;
@@ -42,7 +42,6 @@
         }
         .subtitle { color: var(--text-sub); font-size: 0.95rem; margin-top: 5px; }
 
-        /* Card Style */
         .card {
             background-color: var(--bg-card);
             border-radius: var(--radius);
@@ -53,16 +52,25 @@
         }
 
         .form-group { margin-bottom: 20px; }
+        
+        /* Updated Label Style with Links */
         label {
             display: flex; align-items: center; justify-content: space-between;
             font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; color: var(--text-sub);
+            flex-wrap: wrap; gap: 10px;
         }
         
-        input[type="text"], input[type="password"], select {
-            width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px;
-            font-size: 1rem; box-sizing: border-box; transition: 0.2s;
+        .label-links a {
+            color: var(--primary); text-decoration: none; font-weight: normal; margin-left: 10px;
+            font-size: 0.8rem; display: inline-flex; align-items: center; gap: 2px;
         }
-        input:focus, select:focus { outline: none; border-color: var(--primary); }
+        .label-links a:hover { text-decoration: underline; }
+        
+        input[type="text"], input[type="password"], select, textarea {
+            width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px;
+            font-size: 1rem; box-sizing: border-box; transition: 0.2s; font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
 
         /* File Upload Area */
         .file-drop-zone {
@@ -85,7 +93,6 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); opacity: 0.95; }
-        .btn:active { transform: translateY(0); }
         .btn:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
 
         .btn-summary { background: linear-gradient(135deg, #10b981, #059669); }
@@ -101,15 +108,11 @@
             color: var(--primary-dark); font-weight: 700; font-size: 1.2rem;
         }
 
-        /* Summary Content */
-        .summary-box {
-            line-height: 1.8; font-size: 0.95rem;
-        }
+        .summary-box { line-height: 1.8; font-size: 0.95rem; }
         .summary-box h3 { color: var(--primary); margin-top: 20px; border-left: 4px solid var(--primary); padding-left: 10px; }
         .summary-box ul { padding-left: 20px; background: #f8fafc; padding: 15px 20px 15px 40px; border-radius: 8px; }
         .summary-box strong { color: var(--text-main); background: linear-gradient(transparent 60%, #fff176 60%); }
 
-        /* Quiz Card */
         .quiz-card {
             background: #fff; border: 1px solid var(--border); border-radius: 12px;
             padding: 20px; margin-bottom: 20px; position: relative;
@@ -123,7 +126,6 @@
         }
         .quiz-question { font-weight: 700; font-size: 1.1rem; margin-bottom: 15px; }
 
-        /* Quiz Options */
         .option-btn {
             display: block; width: 100%; text-align: left; padding: 12px 15px;
             margin-bottom: 8px; border: 2px solid var(--border); border-radius: 10px;
@@ -135,7 +137,6 @@
         .option-btn.wrong { border-color: var(--danger); background: #fef2f2; color: #991b1b; }
         .option-btn:disabled { cursor: default; }
 
-        /* Explanation Box */
         .explanation-box {
             margin-top: 15px; padding: 15px; background: #f0f9ff;
             border: 1px solid #bae6fd; border-radius: 10px; color: #0369a1;
@@ -150,7 +151,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .api-link { color: var(--primary); text-decoration: none; font-weight: normal; font-size: 0.8rem; }
         .error-msg { background: #fee2e2; color: #ef4444; padding: 15px; border-radius: 10px; margin-top: 15px; display: none; }
     </style>
 </head>
@@ -162,31 +162,43 @@
             <span class="material-icons-round" style="font-size: 40px;">school</span>
             Exam Prep AI
         </h1>
-        <div class="subtitle">授業資料から「試験問題」と「要点まとめ」を自動作成</div>
+        <div class="subtitle">授業資料やメモから「試験問題」と「要点まとめ」を自動作成</div>
     </header>
 
     <div class="card">
         <div class="form-group">
             <label>
                 API Key (Google Gemini)
-                <a href="help.html" target="_blank" class="api-link">取得方法</a>
+                <div class="label-links">
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank">
+                        <span class="material-icons-round" style="font-size:16px;">open_in_new</span> Google AI Studio
+                    </a>
+                    <a href="help.html" target="_blank">
+                        <span class="material-icons-round" style="font-size:16px;">help_outline</span> 取得方法・解説
+                    </a>
+                </div>
             </label>
-            <input type="password" id="apiKey" placeholder="Alza...">
+            <input type="password" id="apiKey" placeholder="Alza... (APIキーをここに貼り付け)">
         </div>
 
         <div class="form-group">
-            <label>学習資料 (PDF / 画像) <span style="font-weight:normal; font-size:0.8em; color:#ef4444;">※必須</span></label>
+            <label><span style="display:flex; align-items:center; gap:5px;"><span class="material-icons-round" style="font-size:18px;">edit_note</span> テキスト・メモ入力</span></label>
+            <textarea id="userText" rows="4" placeholder="ここに授業のノート、要約したい文章、キーワードなどを直接貼り付けてください。ファイルと組み合わせて使うこともできます。"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>学習資料 (PDF / 画像)</label>
             <div class="file-drop-zone" onclick="document.getElementById('studyFiles').click()">
                 <span class="material-icons-round file-icon">cloud_upload</span><br>
                 <div>クリックしてファイルを選択</div>
-                <div style="font-size:0.8rem; color:#9ca3af;">(複数選択可)</div>
+                <div style="font-size:0.8rem; color:#9ca3af;">(PDF, 画像 / 複数選択可)</div>
             </div>
             <input type="file" id="studyFiles" multiple accept="application/pdf, image/*" style="display:none" onchange="updateFileList('studyFiles', 'studyFileList')">
             <div id="studyFileList" class="file-list"></div>
         </div>
 
         <div class="form-group">
-            <label>過去問 (任意) <span style="font-weight:normal; font-size:0.8em;">※傾向分析に使用</span></label>
+            <label>過去問 (任意) <span style="font-weight:normal; font-size:0.8em; color:#9ca3af;">※傾向分析に使用</span></label>
             <div class="file-drop-zone" style="padding:15px; border-style:dotted;" onclick="document.getElementById('pastFiles').click()">
                 <div style="color:#6b7280; font-size:0.9rem;">
                     <span class="material-icons-round" style="vertical-align:middle; margin-right:5px;">history_edu</span>
@@ -255,7 +267,7 @@
 </div>
 
 <script>
-    // --- 1. File Handling ---
+    // --- 1. File & Text Handling ---
     
     function updateFileList(inputId, listId) {
         const input = document.getElementById(inputId);
@@ -290,11 +302,18 @@
         });
     }
 
-    async function processFiles() {
+    async function processInput() {
         const studyFiles = document.getElementById('studyFiles').files;
         const pastFiles = document.getElementById('pastFiles').files;
-        let textContext = "【学習資料テキスト】\n";
+        const userText = document.getElementById('userText').value;
+        
+        let textContext = "【学習資料データ】\n";
         let images = [];
+
+        // 自由記述テキストを追加
+        if (userText.trim()) {
+            textContext += "\n--- ユーザー入力テキスト ---\n" + userText + "\n";
+        }
 
         const handleFiles = async (fileList, label) => {
             for (let i = 0; i < fileList.length; i++) {
@@ -311,11 +330,13 @@
             }
         };
 
-        await handleFiles(studyFiles, "学習資料");
+        await handleFiles(studyFiles, "学習資料ファイル");
+        
         if (pastFiles.length > 0) {
             textContext += "\n【過去問資料】(以下の傾向を分析して反映)\n";
             await handleFiles(pastFiles, "過去問");
         }
+        
         return { text: textContext, images: images };
     }
 
@@ -326,7 +347,6 @@
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
             const data = await response.json();
             const models = data.models || [];
-            // generateContent が使えるモデルを探す
             const validModel = models.find(m => m.name.includes("flash") && m.supportedGenerationMethods.includes("generateContent")) 
                             || models.find(m => m.name.includes("pro") && m.supportedGenerationMethods.includes("generateContent"));
             return validModel ? validModel.name.replace('models/', '') : "gemini-1.5-flash";
@@ -339,11 +359,14 @@
         const diff = document.getElementById('difficulty').value;
         const errorMsg = document.getElementById('errorMsg');
         
+        const hasFiles = document.getElementById('studyFiles').files.length > 0;
+        const hasText = document.getElementById('userText').value.trim().length > 0;
+
         if (!apiKey) {
             errorMsg.style.display = 'block'; errorMsg.innerText = "APIキーを入力してください"; return;
         }
-        if (document.getElementById('studyFiles').files.length === 0) {
-            errorMsg.style.display = 'block'; errorMsg.innerText = "学習資料をアップロードしてください"; return;
+        if (!hasFiles && !hasText) {
+            errorMsg.style.display = 'block'; errorMsg.innerText = "学習資料(ファイル)をアップロードするか、テキストを入力してください"; return;
         }
 
         // Reset UI
@@ -352,17 +375,17 @@
         document.getElementById(`loader-${type}`).style.display = 'block';
         
         try {
-            const fileData = await processFiles();
+            const inputData = await processInput();
             const modelName = await findWorkingModel(apiKey);
             
             let systemPrompt = "";
             if (type === 'summary') {
                 systemPrompt = `
-あなたは優秀な学習チューターです。提供された資料に基づいて、試験に出る可能性が高い重要なポイントを要約してください。
+あなたは優秀な学習チューターです。提供された資料（テキストおよび画像）に基づいて、試験に出る可能性が高い重要なポイントを要約してください。
 出力はHTML形式で、<h3>見出し</h3>、<ul><li>箇条書き</li></ul>、重要な単語は<strong>太字</strong>を使って見やすく整形してください。Markdownは不要です。`;
             } else {
                 systemPrompt = `
-あなたは試験問題作成のプロです。提供された資料（および過去問）に基づいて、予想問題を作成してください。
+あなたは試験問題作成のプロです。提供された資料（テキストおよび画像）に基づいて、予想問題を作成してください。
 形式: ${qType}、難易度: ${diff}、問題数: 3〜5問。
 
 【出力フォーマット】
@@ -380,8 +403,8 @@
             const contents = [{
                 parts: [
                     { text: systemPrompt },
-                    { text: fileData.text },
-                    ...fileData.images 
+                    { text: inputData.text },
+                    ...inputData.images 
                 ]
             }];
 
@@ -466,19 +489,16 @@
         const explanation = container.nextElementSibling;
         const allBtns = container.querySelectorAll('.option-btn');
         
-        allBtns.forEach(b => b.disabled = true); // 一度答えたら無効化
+        allBtns.forEach(b => b.disabled = true); 
 
         if (userAns === correctAns) {
             btn.classList.add('correct');
-            // 正解音などを鳴らすならここ
         } else {
             btn.classList.add('wrong');
-            // 正解のボタンをハイライト
             allBtns.forEach(b => {
                 if (b.innerText === correctAns) b.classList.add('correct');
             });
         }
-        $(explanation).fadeIn(); // jQueryなしなので下記で代用
         explanation.style.display = 'block';
         explanation.animate([{opacity:0}, {opacity:1}], {duration:300});
     }
